@@ -1,1 +1,1 @@
-//Test code
+from java.lang import *;
