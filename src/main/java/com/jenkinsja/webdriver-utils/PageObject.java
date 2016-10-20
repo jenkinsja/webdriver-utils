@@ -6,12 +6,15 @@ import java.lang.reflect.Field;
 import java.lang.Class;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.util.logging.Logger;
 
 public class PageObject<T extends PageObject<T>> {
     
+    private final static Logger LOGGER = Logger.getLogger(PageObject.class.getName());
     private WebDriver driver;
     private WebDriverWait wait;
     
@@ -21,6 +24,33 @@ public class PageObject<T extends PageObject<T>> {
     }
     
     //Location Helpers
+    /**
+     * Pass-through to driver
+     */
+    public WebElement FindElement(By by){
+        return driver.findElement(by);
+    }
+    
+    /**
+     * Pass-through to driver
+     */
+    public List<WebElement> FindElements(By by){
+        return driver.findElements(by);
+    }
+    
+    /**
+     * Find element under root
+     */
+    public WebElement FindElement(By by, WebElement root){
+        return root.findElement(by);
+    }
+    
+    /**
+     * Find elements under root
+     */
+    public List<WebElement> FindElements(By by, WebElement root){
+        return root.findElements(by);
+    }
     
     //Page Loading
     /**
@@ -28,7 +58,7 @@ public class PageObject<T extends PageObject<T>> {
      * by the annotations on that field.
      * When all these conditions are met, we consider the page to be loaded.
      */
-    public T WaitUntilLoaded(){
+    protected T WaitUntilLoaded(){
         Field[] fields = this.getClass().getFields();
         for (Field field : fields){
             Annotation[] annotations = field.getDeclaredAnnotations();
@@ -49,7 +79,7 @@ public class PageObject<T extends PageObject<T>> {
     /**
      * Wait for the field with the Clickable annotation to be visible and enabled
      */
-    public void WaitForClickableField(Field field){
+    private void WaitForClickableField(Field field){
         try{
             if (field.getGenericType() instanceof WebElement){
                 WebElement element = (WebElement)(field.get(this));
@@ -66,7 +96,7 @@ public class PageObject<T extends PageObject<T>> {
     /**
      * Wait for the field with the Existence annotation to be in the DOM
      */
-    public void WaitForExistenceField(Field field){
+    private void WaitForExistenceField(Field field){
         try{
             if (field.getGenericType() instanceof WebElement){
                 WebElement element = (WebElement)(field.get(this));
@@ -83,7 +113,7 @@ public class PageObject<T extends PageObject<T>> {
     /**
      * Wait for the field with the Visible annotation to be visible on the page
      */
-    public void WaitForVisibleField(Field field) {
+    private void WaitForVisibleField(Field field) {
         try{
             if (field.getGenericType() instanceof WebElement){
                 WebElement element = (WebElement)(field.get(this));
@@ -100,7 +130,7 @@ public class PageObject<T extends PageObject<T>> {
     /**
      * Checks if one of the elements in the list is visible
      */
-    public static ExpectedCondition<Boolean> ElementsVisible(final List<WebElement> elements) {
+    private static ExpectedCondition<Boolean> ElementsVisible(final List<WebElement> elements) {
     	return new ExpectedCondition<Boolean>() {
     		@Override
     		public Boolean apply(WebDriver webDriver) {
@@ -117,7 +147,7 @@ public class PageObject<T extends PageObject<T>> {
     /**
      * Checks if one of the elements in the list is clickable
      */
-    public static ExpectedCondition<Boolean> ElementsClickable(final List<WebElement> elements) {
+    private static ExpectedCondition<Boolean> ElementsClickable(final List<WebElement> elements) {
     	return new ExpectedCondition<Boolean>() {
     		@Override
     		public Boolean apply(WebDriver webDriver) {
@@ -132,5 +162,11 @@ public class PageObject<T extends PageObject<T>> {
     }
     
     //Page Actions
-    
+    public T ClickButton(WebElement element, String name){
+        LOGGER.info("Clicking element " + name);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        element.click();
+        LOGGER.info("Done clicking element " + name);
+        return (T)this;
+    }
 }
