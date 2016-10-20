@@ -169,4 +169,12 @@ public class PageObject<T extends PageObject<T>> {
         LOGGER.info("Done clicking element " + name);
         return (T)this;
     }
+    
+    public T SendKeys(WebElement element, String keys, String name){
+        LOGGER.info("Sending test \"" + keys + "\" to " + name);
+        element.clear();
+        element.sendKeys(keys);
+        LOGGER.info("Done sending test \"" + keys + "\" to " + name);
+        return (T)this;
+    }
 }
