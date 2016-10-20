@@ -1,17 +1,27 @@
 package java.com.jenkinsja.webdriverutils;
 
+import java.lang.annotation.Annotation;
+import java.lang.Class;
+import java.util.List;
+import java.util.logging.Logger;
+import java.lang.reflect.Field;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import java.lang.reflect.Field;
-import java.lang.Class;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import java.util.logging.Logger;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+/**
+ * Generic class that represents a page object.
+ * This class facilitates the finding of elements on the page, or underneath
+ * an element on the page.
+ * It also takes care of synchronization with the WaitUntilLoaded method, which will
+ * reflexively inspect the fields of class, and wait until each of those fields meets
+ * the annotated states of those fields.
+ * Finally, this class facilitates common page actions, taking care of synchronization,
+ * logging, and the action itself.
+ */
 public class PageObject<T extends PageObject<T>> {
     
     private final static Logger LOGGER = Logger.getLogger(PageObject.class.getName());
@@ -89,7 +99,7 @@ public class PageObject<T extends PageObject<T>> {
                 wait.until(ElementsClickable(elements));
             }
         } catch (IllegalAccessException e) {
-            
+            LOGGER.info("Could not determine field type");
         }
     }
     
@@ -106,7 +116,7 @@ public class PageObject<T extends PageObject<T>> {
                 //If we have a list of elements, then they exists
             }
         } catch (IllegalAccessException e) {
-            
+            LOGGER.info("Could not determine field type");
         }
     }
     
@@ -123,7 +133,7 @@ public class PageObject<T extends PageObject<T>> {
                 wait.until(ElementsVisible(elements));
             }
         } catch (IllegalAccessException e) {
-            
+            LOGGER.info("Could not determine field type");
         }
     }
     
