@@ -7,6 +7,7 @@ import java.lang.Class;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class PageObject<T extends PageObject<T>> {
@@ -49,14 +50,34 @@ public class PageObject<T extends PageObject<T>> {
      * Wait for the field with the Clickable annotation to be visible and enabled
      */
     public void WaitForClickableField(Field field){
-        
+        try{
+            if (field.getGenericType() instanceof WebElement){
+                WebElement element = (WebElement)(field.get(this));
+                wait.until(ExpectedConditions.elementToBeClickable(element));
+            } else if (field.getGenericType() instanceof List<?>){
+                List<WebElement> elements = (List<WebElement>)(field.get(this));
+                wait.until(ElementsClickable(elements));
+            }
+        } catch (IllegalAccessException e) {
+            
+        }
     }
     
     /**
      * Wait for the field with the Existence annotation to be in the DOM
      */
     public void WaitForExistenceField(Field field){
-        
+        try{
+            if (field.getGenericType() instanceof WebElement){
+                WebElement element = (WebElement)(field.get(this));
+                //If we have the element, then it exists
+            } else if (field.getGenericType() instanceof List<?>){
+                List<WebElement> elements = (List<WebElement>)(field.get(this));
+                //If we have a list of elements, then they exists
+            }
+        } catch (IllegalAccessException e) {
+            
+        }
     }
     
     /**
@@ -69,22 +90,45 @@ public class PageObject<T extends PageObject<T>> {
                 wait.until(ExpectedConditions.visibilityOf(element));
             } else if (field.getGenericType() instanceof List<?>){
                 List<WebElement> elements = (List<WebElement>)(field.get(this));
-                
+                wait.until(ElementsVisible(elements));
             }
         } catch (IllegalAccessException e) {
             
         }
     }
     
-    public static void WaitUntil(final WebDriver driver) {
-        // Wait for the console panel to load
-       (new WebDriverWait(driver, 15)).until(new ExpectedCondition<Boolean>() {
-          public Boolean apply(WebDriver d) {
-             List<WebElement>elements = driver.findElements(By.id(
-                   ElementIds.getElementId(ElementIds.CONSOLE_INPUT)));
-             return elements.size() > 0;
-          }
-       });
+    /**
+     * Checks if one of the elements in the list is visible
+     */
+    public static ExpectedCondition<Boolean> ElementsVisible(final List<WebElement> elements) {
+    	return new ExpectedCondition<Boolean>() {
+    		@Override
+    		public Boolean apply(WebDriver webDriver) {
+                for (WebElement element : elements){
+                    if (element.isDisplayed()){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+    
+    /**
+     * Checks if one of the elements in the list is clickable
+     */
+    public static ExpectedCondition<Boolean> ElementsClickable(final List<WebElement> elements) {
+    	return new ExpectedCondition<Boolean>() {
+    		@Override
+    		public Boolean apply(WebDriver webDriver) {
+                for (WebElement element : elements){
+                    if (element.isDisplayed() && element.isEnabled()){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
     
     //Page Actions
